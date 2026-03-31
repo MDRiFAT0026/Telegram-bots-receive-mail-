@@ -3,15 +3,38 @@ import email
 from email.header import decode_header
 import requests
 import time
-import os
 
-EMAIL = os.environ['pagoldarsanik@gmail.com']  # তোমার Gmail
-APP_PASSWORD = os.environ['zxat jbhj ejks nlqv']  # Gmail app password
-BOT_TOKEN = os.environ['8075761114:AAH-1OlKoUwEZbnpl-pDj0S-GL66gGVrlH0']
-CHAT_ID = os.environ['7355153180']
+# ==========================
+# Telegram Settings
+# ==========================
+BOT_TOKEN = "8676092689:AAFFly55LiT4rhQ-Z-uAmP5gP8r4Wx71MZU"
+CHAT_ID = "7799924845"
 
-last_seen_id = None  # নতুন mail track করার জন্য
+# ==========================
+# Gmail Accounts
+# Format: "email@gmail.com": "app_password"
+# ==========================
+ACCOUNTS = {
+    "mrifatislam2008@gmail.com": "urdb okiu tpyn kbnv",
+    "pagoldarsanik@gmail.com": "zxat jbhj ejks nlqv",
+    "email3@gmail.com": "app_pass3",
+    "email4@gmail.com": "app_pass4",
+    "email5@gmail.com": "app_pass5",
+    "email6@gmail.com": "app_pass6",
+    "email7@gmail.com": "app_pass7",
+    "email8@gmail.com": "app_pass8",
+    "email9@gmail.com": "app_pass9",
+    "email10@gmail.com": "app_pass10",
+}
 
+# ==========================
+# Track last seen email per account
+# ==========================
+last_seen_ids = {}
+
+# ==========================
+# Telegram Sender
+# ==========================
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     requests.post(url, data={
@@ -19,6 +42,9 @@ def send_telegram(text):
         "text": text
     })
 
+# ==========================
+# Decode Email Header
+# ==========================
 def decode_text(text):
     if text is None:
         return "No Subject"
@@ -27,57 +53,63 @@ def decode_text(text):
         return decoded.decode(charset or "utf-8", errors="ignore")
     return decoded
 
-def check_mail():
-    global last_seen_id
+# ==========================
+# Check New Emails
+# ==========================
+def check_mail(email_addr, app_pass):
+    global last_seen_ids
+    try:
+        mail = imaplib.IMAP4_SSL("imap.gmail.com")
+        mail.login(email_addr, app_pass)
+        mail.select("inbox")
 
-    mail = imaplib.IMAP4_SSL("imap.gmail.com")
-    mail.login(EMAIL, APP_PASSWORD)
-    mail.select("inbox")
+        status, messages = mail.search(None, "ALL")
+        mail_ids = messages[0].split()
+        if not mail_ids:
+            mail.logout()
+            return
 
-    status, messages = mail.search(None, "ALL")
-    mail_ids = messages[0].split()
+        latest_id = mail_ids[-1]
 
-    if not mail_ids:
-        return
+        # প্রথমবার run হলে শুধু latest save করবে, send করবে না
+        if email_addr not in last_seen_ids:
+            last_seen_ids[email_addr] = latest_id
+            print(f"[{email_addr}] Initialized. Waiting for new mails...")
+            mail.logout()
+            return
 
-    latest_id = mail_ids[-1]
+        new_mails = [num for num in mail_ids if int(num) > int(last_seen_ids[email_addr])]
 
-    # প্রথমবার run হলে শুধু latest save করবে, send করবে না
-    if last_seen_id is None:
-        last_seen_id = latest_id
-        print("Initialized. Waiting for new mails...")
-        return
-
-    new_mails = [num for num in mail_ids if int(num) > int(last_seen_id)]
-
-    for num in new_mails:
-        status, msg_data = mail.fetch(num, "(RFC822)")
-
-        for response_part in msg_data:
-            if isinstance(response_part, tuple):
-                msg = email.message_from_bytes(response_part[1])
-
-                subject = decode_text(msg["subject"])
-                from_ = decode_text(msg["from"])
-
-                text = f"""📩 NEW EMAIL
-
+        for num in new_mails:
+            status, msg_data = mail.fetch(num, "(RFC822)")
+            for response_part in msg_data:
+                if isinstance(response_part, tuple):
+                    msg = email.message_from_bytes(response_part[1])
+                    subject = decode_text(msg["subject"])
+                    from_ = decode_text(msg["from"])
+                    text = f"""📩 NEW EMAIL
 👤 From: {from_}
 📝 Subject: {subject}
+💌 Gmail: {email_addr}
 """
-                send_telegram(text)
-                print("Sent:", subject)
+                    send_telegram(text)
+                    print(f"[{email_addr}] Sent: {subject}")
 
-    last_seen_id = latest_id
-    mail.logout()
+        last_seen_ids[email_addr] = latest_id
+        mail.logout()
 
-# 🔔 Bot Startup Notification
-send_telegram("🤖 Bot is now ONLINE! Waiting for new emails...")
-
-while True:
-    try:
-        check_mail()
     except Exception as e:
-        print("ERROR:", e)
+        print(f"[{email_addr}] ERROR:", e)
 
+# ==========================
+# Bot Startup Notification
+# ==========================
+send_telegram("🤖 Multi-Gmail Bot is now RUNNING! Waiting for new emails...")
+
+# ==========================
+# Main Loop
+# ==========================
+while True:
+    for email_addr, app_pass in ACCOUNTS.items():
+        check_mail(email_addr, app_pass)
     time.sleep(60)  # প্রতি ১ মিনিটে চেক করবে
