@@ -15,11 +15,11 @@ CHAT_ID = "7799924845"
 # Format: "email@gmail.com": "app_password"
 # ==========================
 ACCOUNTS = {
-    "mrifatislam2008@gmail.com": "urdb okiu tpyn kbnv",
-    "pagoldarsanik@gmail.com": "zxat jbhj ejks nlqv",
-    "email3@gmail.com": "app_pass3",
-    "email4@gmail.com": "app_pass4",
-    "email5@gmail.com": "app_pass5",
+    "paneL12345g@gmail.com": "fmts iyih pzkb jcea",
+    "mdsohag3992@gmail.com": "nkpd ydfv tply qpny",
+    "mpaleologoSmatthew@gmail.com": "mtvj vnva ghik ibmy",
+    "mondaldiku7@gmail.com": "yolc iwtc kjng iqwt",
+    "claudettespencer45@gmail.com": "eftz dmvz aasd jmkz",
     "email6@gmail.com": "app_pass6",
     "email7@gmail.com": "app_pass7",
     "email8@gmail.com": "app_pass8",
