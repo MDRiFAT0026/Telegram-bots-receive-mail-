@@ -12,6 +12,13 @@ BOT_TOKEN = os.environ['8075761114:AAH-1OlKoUwEZbnpl-pDj0S-GL66gGVrlH0']
 CHAT_ID = os.environ['7355153180']
 # =================================
 
+def send_telegram(text):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    requests.post(url, data={
+        "chat_id": CHAT_ID,
+        "text": text
+    })
+
 def decode_text(text):
     if text is None:
         return "No Data"
@@ -19,14 +26,6 @@ def decode_text(text):
     if isinstance(decoded, bytes):
         return decoded.decode(charset or "utf-8", errors="ignore")
     return decoded
-
-def send_telegram(text):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    res = requests.post(url, data={
-        "chat_id": CHAT_ID,
-        "text": text
-    })
-    print("Telegram Response:", res.text)
 
 def check_mail():
     try:
@@ -61,6 +60,9 @@ def check_mail():
         mail.logout()
     except Exception as e:
         print("ERROR:", e)
+
+# ===== Bot Startup Notification =====
+send_telegram("🤖 Bot is now ONLINE! Checking Gmail...")
 
 # ===== Main loop =====
 while True:
