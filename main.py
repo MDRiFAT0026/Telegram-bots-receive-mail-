@@ -112,4 +112,4 @@ send_telegram("🤖 Multi-Gmail Bot is now RUNNING! Waiting for new emails...")
 while True:
     for email_addr, app_pass in ACCOUNTS.items():
         check_mail(email_addr, app_pass)
-    time.sleep(60)  # প্রতি ১ মিনিটে চেক করবে
+    time.sleep(5)  # প্রতি ১ মিনিটে চেক করবে
